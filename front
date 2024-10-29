@@ -1,0 +1,66 @@
+// App.js - Frontend for Stranger Things Tweet Game
+import React, { useState, useEffect } from 'react';
+
+const BACKEND_URL = 'http://127.0.0.1:5000';  // Replace with Render URL after deployment
+
+function App() {
+  const [tweets, setTweets] = useState([]);
+  const [content, setContent] = useState('');
+  const [character, setCharacter] = useState('Mike');
+  const [user, setUser] = useState('Player');
+
+  // Fetch all tweets on load
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/tweets`)
+      .then((response) => response.json())
+      .then((data) => setTweets(data));
+  }, []);
+
+  // Send a tweet
+  const sendTweet = async () => {
+    const tweetData = { user, character, content };
+    const response = await fetch(`${BACKEND_URL}/tweet`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(tweetData),
+    });
+    const result = await response.json();
+    setTweets([...tweets, { user, content }, result]);
+    setContent('');
+  };
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <h1>Stranger Things Social Game</h1>
+      <div>
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Write your tweet..."
+          rows="4"
+          cols="50"
+        />
+      </div>
+      <div>
+        <select onChange={(e) => setCharacter(e.target.value)}>
+          <option value="Mike">Mike</option>
+          <option value="Eleven">Eleven</option>
+          <option value="Dustin">Dustin</option>
+          <option value="Hopper">Hopper</option>
+          <option value="Max">Max</option>
+        </select>
+        <button onClick={sendTweet}>Tweet</button>
+      </div>
+      <div style={{ marginTop: '20px' }}>
+        <h2>Tweet Feed</h2>
+        {tweets.map((tweet, index) => (
+          <div key={index} style={{ marginBottom: '10px' }}>
+            <strong>{tweet.user}:</strong> {tweet.content}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default App;
